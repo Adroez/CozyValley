@@ -17,6 +17,10 @@ export type RemoteSpec = {
 -- Single registry of every remote the game uses. Add new entries here.
 local SPECS: {RemoteSpec} = {
 	{ name = "Ping", class = "Event" }, -- bootstrap smoke test
+	{ name = "FarmAction", class = "Event" }, -- client -> server farming requests
+	{ name = "FarmResult", class = "Event" }, -- server -> per-client action feedback
+	{ name = "FarmSync", class = "Event" }, -- server -> all clients plot state deltas
+	{ name = "GetFarmSnapshot", class = "Function" }, -- client pull of full farm state
 }
 
 local Remotes = {}

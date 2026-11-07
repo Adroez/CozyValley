@@ -5,4 +5,5 @@
 return {
 	require(script.PingService),
 	require(script.PlayerService),
+	require(script.FarmService),
 }

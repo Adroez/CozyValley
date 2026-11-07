@@ -3,4 +3,5 @@
 
 return {
 	require(script.HUDController),
+	require(script.FarmController),
 }

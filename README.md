@@ -72,9 +72,11 @@ Rules of thumb:
 ## Initialization order
 
 1. Server boot (`init.server.luau`) creates `CozyRemotes` and all registered
-   remotes, then starts services (`PingService`, `PlayerService`).
+   remotes, then starts services (`PingService`, `PlayerService`,
+   `FarmService`).
 2. Client boot (`init.client.luau`) waits for replication, initializes the
-   `Remotes` wrapper, then starts controllers (`HUDController`).
+   `Remotes` wrapper, then starts controllers (`HUDController`,
+   `FarmController`).
 3. Each service/controller starts inside `pcall` so one failure cannot kill
    the whole boot.
 
@@ -82,12 +84,42 @@ Rules of thumb:
 
 - [x] **M1 Foundation** — architecture, bootstraps, Remotes wrapper, config,
   placeholder HUD, player spawn service
-- [ ] M2 Farming — tilling, planting, watering, growth, harvest
+- [x] **M2 Farming** — server-authoritative soil plots, planting,
+  watering, time-based growth, harvesting; debug keybindings until
+  the M3 hotbar
 - [ ] M3 Inventory — items, stacking, hotbar, selection
 - [ ] M4 World — farm/town environment, interactables, day-night cycle
 - [ ] M5 NPCs — dialogue, schedules, friendship
 - [ ] M6 Systems — fishing, mining, crafting, cooking, weather, seasons
 - [ ] M7 Polish — UI, audio, animation, performance, saving
+
+## Farming (Milestone 2)
+
+`src/server/Services/FarmService.luau` owns all farm state; clients only
+send intent. Key pieces:
+
+- **Plots**: a fixed grid (`Farming.Grid` in
+  `src/shared/Modules/Farming.luau`) of server-built tiles under
+  `Workspace.Farm.Plots`, keyed `"x,y"`.
+- **Actions**: one `FarmAction` remote carries `Till | Plant | Water |
+  Harvest`; the server validates type, grid bounds, reach, occupancy,
+  seed id, season and maturity before anything changes, then broadcasts
+  the resulting plot state on `FarmSync`. Per-player feedback via
+  `FarmResult`; full state pull via `GetFarmSnapshot` for late joiners.
+- **Growth**: a single heartbeat accumulates game minutes per crop
+  (season multiplier from `Seasons.luau`, watered bonus vs dry penalty
+  from `Crops.luau`). No per-crop tasks. Stage math lives in the shared
+  `Farming` module so client rendering always agrees with the server.
+- **Config**: crops in `src/shared/Config/Crops.luau`, items in
+  `src/shared/Config/Items.luau` (extended by Milestone 3).
+- **Debug controls** (until the hotbar exists): keys `1` hoe, `2` seeds,
+  `3` watering can, `4` harvest, `E` use on the hovered tile. Planting
+  uses a placeholder turnip seed and grants no items yet — both wired
+  to real inventory in Milestone 3.
+
+The farming clock inside `FarmService` is a minimal internal game clock
+(minutes/day/year + season). Milestone 4's TimeService will replace it
+behind the same interface.
 
 ## Validating without Studio
 
