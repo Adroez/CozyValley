@@ -25,8 +25,19 @@ Optional local tooling (not required, not installed by default):
 `stylua` for formatting, `luau-analyze`/Lune for static typing and
 headless tests. If installed later, drop configs next to this README.
 
-This is a standalone local project: no remote repository or Git hosting
-workflow is part of the development process.
+Version control is plain local Git with the private GitHub remote
+(`origin`). The working procedure is: edit files here, `rojo build` to
+validate, then commit small focused changes and `git push` when a
+milestone step is reviewed. Never rewrite pushed history without an
+explicit decision to do so.
+
+```bash
+git status                 # always check before committing
+git add <paths>            # stage only intended files (never dot-files)
+git diff --cached          # verify staged content
+git commit -m "M<n>: <summary>"
+git push                   # keep origin/main up to date after approval
+```
 
 ## Architecture
 
